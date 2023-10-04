@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Pressable, FlatList, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  FlatList,
+  StyleSheet,
+  ImageBackground,
+} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Notifications from "expo-notifications";
+import { Audio } from "expo-av";
 
 export default function App() {
   const [date, setDate] = useState(new Date());
@@ -37,6 +45,8 @@ export default function App() {
           repeats: false,
         },
       });
+
+      await playSound();
       alert("Birthday Alert set!");
       getScheduledNotifications();
     } catch (error) {
@@ -48,6 +58,16 @@ export default function App() {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
     setScheduledBirthdays(scheduled);
   };
+  const playSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require("./assets/LertSound.mp3")
+      );
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error playing sound:", error);
+    }
+  };
 
   const deleteScheduledNotification = async (identifier) => {
     await Notifications.cancelScheduledNotificationAsync(identifier);
@@ -55,19 +75,27 @@ export default function App() {
   };
 
   const renderItem = ({ item }) => (
-    <View style={{ marginBottom: 5 }}>
-      <Text>{item.content.body}</Text>
+    <View
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 5,
+      }}
+    >
+      <Text style={{ flex: 1 }}>{item.content.body}</Text>
       <Pressable
         onPress={() => deleteScheduledNotification(item.identifier)}
         style={{
-          width: "30%",
-          backgroundColor: "#dd5656",
+          backgroundColor: "#279EFF",
           borderRadius: 20,
-          padding: 5,
-          marginTop: 5,
+          padding: 10,
+          marginLeft: 10,
         }}
       >
-        <Text style={{ color: "white" }}>Remove Alert</Text>
+        <Text style={{ color: "white", fontWeight: "900" }}>
+          Remove Reminder
+        </Text>
       </Pressable>
     </View>
   );
@@ -75,20 +103,26 @@ export default function App() {
   return (
     <View style={style.container}>
       <View style={style.childone}>
-        <View style={{ alignItems: "center" }}>
-          <Text
+        <View style={{ width: "100%", height: "90%", marginBottom: 10 }}>
+          <ImageBackground
+            source={require("./assets/BackPic.jpg")}
             style={{
-              fontSize: 30,
-              fontWeight: "bold",
-              marginBottom: 1.5,
-              color: "black",
+              height: "100%",
+              justifyContent: "center",
             }}
           >
-            SEDILERTS{" "}
-          </Text>
-          <Text style={{ fontSize: 15, marginBottom: 1.5, color: "black" }}>
-            Alert you to not forget your loved one's birthdays...
-          </Text>
+            <Text
+              style={{
+                fontSize: 40,
+                fontWeight: "bold",
+                marginBottom: 1,
+                color: "black",
+                alignSelf: "center",
+              }}
+            >
+              SEDILERTS
+            </Text>
+          </ImageBackground>
         </View>
         <View
           style={{
@@ -99,25 +133,33 @@ export default function App() {
         >
           <Pressable
             style={{
-              backgroundColor: "gray",
+              backgroundColor: "#8EACCD",
               borderRadius: 20,
               padding: 10,
             }}
             onPress={showDatepicker}
           >
-            <Text style={{ color: "black", alignSelf: "center" }}>
+            <Text
+              style={{
+                color: "black",
+                fontWeight: "900",
+                alignSelf: "center",
+              }}
+            >
               Pick a Date
             </Text>
           </Pressable>
           <Pressable
             style={{
-              backgroundColor: "gray",
+              backgroundColor: "#8EACCD",
               borderRadius: 20,
               padding: 10,
             }}
             onPress={scheduleBirthdayReminder}
           >
-            <Text style={{ color: "black", alignSelf: "center" }}>
+            <Text
+              style={{ color: "black", alignSelf: "center", fontWeight: "900" }}
+            >
               Set A Reminder
             </Text>
           </Pressable>
@@ -149,9 +191,9 @@ export default function App() {
 const style = StyleSheet.create({
   container: {
     justifyContent: "center",
-    alignItems: "stretch",
+
     flex: 1,
-    backgroundColor: "#5a5a5a",
+    backgroundColor: "#D2E0FB",
   },
   childone: {
     justifyContent: "flex-end",
@@ -163,6 +205,7 @@ const style = StyleSheet.create({
     justifyContent: "flex-start",
     marginLeft: 10,
     marginRight: 10,
+    marginTop: 10,
     flex: 1,
   },
 });
